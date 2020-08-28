@@ -157,7 +157,7 @@ const getMetrics = () => {
             if (!results.has(community)) {
               results.set(community, []);
             }
-            results.get(community).push(res);
+            results.get(community).push({...res, metric});
           }).catch(err => console.log(`Error: ${err}`)));
       });
 
