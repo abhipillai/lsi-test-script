@@ -1,0 +1,22 @@
+{
+  "name": "lsi-test-script",
+  "version": "1.0.0",
+  "description": "Sample script to test the new LSI APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abhipillai/lsi-test-script.git"
+  },
+  "author": "abhishek pillai",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abhipillai/lsi-test-script/issues"
+  },
+  "homepage": "https://github.com/abhipillai/lsi-test-script#readme",
+  "dependencies": {
+    "p-queue": "^6.6.1"
+  }
+}
