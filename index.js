@@ -59,7 +59,7 @@ const getBillingMetrics = () => {
     let results = [];
 
     communities
-    .slice(0, 50)          //uncomment this to test fewer community instances
+    // .slice(0, 50)          //uncomment this to test fewer community instances
     .forEach(community => {
 
       let billingMetricsUrl = new URL(`http://internal-ca-fury-dapper-stage-usw2-1736670358.us-west-2.elb.amazonaws.com/dev/v2/${community}/analytics/billing-metrics-usage`);
