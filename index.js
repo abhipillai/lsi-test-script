@@ -1,7 +1,7 @@
 const URL = require('url').URL;
 const http = require('http');
 const https = require('https');
-const repoUrl = new URL('https://repo.sj.lithium.com/config/values?key=community');
+const repoUrl = new URL('https://repo.sj.lithium.com/config/values?key=datacenter');
 
 // p-queue enables us to make 10 API calls concurrently instead of running everything together
 const { default: PQueue } = require('p-queue');
@@ -14,6 +14,40 @@ const metrics = [
   'visits',
   'pageviews'
 ];
+
+const getUrl = (datacenter, environment) => {
+
+  let url;
+  if (environment == 'prod') {
+    if (datacenter == 'sj') {
+      url = `http://internal-ca-fury-dapper-prod-usw2-1079696210.us-west-2.elb.amazonaws.com/dev/v2`;
+    } else {
+      url = `http://internal-ca-fury-dapper-prod-euw1-350150025.eu-west-1.elb.amazonaws.com/dev/v2`;
+    }
+  } else {
+    if (datacenter == 'sj') {
+      url = `http://internal-ca-fury-dapper-stage-usw2-1736670358.us-west-2.elb.amazonaws.com/dev/v2`;
+    } else {
+      url = `http://internal-ca-fury-dapper-stage-euw1-53955540.eu-west-1.elb.amazonaws.com/dev/v2`;
+    }
+  }
+
+  return url;
+}
+
+const getBillingMetricsUrl = (community, datacenter, environment) => {
+
+  let url = getUrl(datacenter, environment);
+  return new URL(`${url}/${community}/analytics/billing-metrics-usage`);
+
+}
+
+const getMetricsUrl = (community, datacenter, environment) => {
+
+  let url = getUrl(datacenter, environment);
+  return new URL(`${url}/${community}/analytics`);
+
+}
 
 const makeHttpsRequest = options => {
   return new Promise((resolve, reject) => {
@@ -48,7 +82,7 @@ const makeHttpRequest = options => {
 }
 
 // Billing Metrics
-const getBillingMetrics = () => {
+const getBillingMetrics = (environment = 'stage') => {
 
   // Get a list of active communities from repo.sj
   return makeHttpsRequest(repoUrl)
@@ -57,12 +91,15 @@ const getBillingMetrics = () => {
     const communities = Object.keys(res);
 
     let results = [];
+    let countUs = 0;
+    let countEu = 0;
 
     communities
     // .slice(0, 50)          //uncomment this to test fewer community instances
     .forEach(community => {
 
-      let billingMetricsUrl = new URL(`http://internal-ca-fury-dapper-stage-usw2-1736670358.us-west-2.elb.amazonaws.com/dev/v2/${community}/analytics/billing-metrics-usage`);
+      let datacenter = res[community];
+      let billingMetricsUrl = getBillingMetricsUrl(community, datacenter, environment);
 
       let urlPath = billingMetricsUrl.pathname;
 
@@ -115,7 +152,7 @@ const getMetricsForCommunity = (options, startTime, endTime, metric) => {
 
 };
 
-const getMetrics = () => {
+const getMetrics = (environment = 'stage') => {
 
   return makeHttpsRequest(repoUrl)
   .then(res => {
@@ -127,7 +164,8 @@ const getMetrics = () => {
     // .slice(0, 50)          //uncomment this to test fewer community instances
     .forEach(community => {
 
-      let metricsUrl = new URL(`http://internal-ca-fury-dapper-stage-usw2-1736670358.us-west-2.elb.amazonaws.com/dev/v2/${community}/analytics`);
+      let datacenter = res[community];
+      let metricsUrl = getMetricsUrl(community, datacenter, environment);
 
       let urlPath = metricsUrl.pathname;
 
@@ -172,5 +210,7 @@ const getMetrics = () => {
 
 }
 
-getBillingMetrics()
-// getMetrics()
+// getBillingMetrics('stage')
+// getBillingMetrics('prod')
+getMetrics('stage')
+// getMetrics('prod')
